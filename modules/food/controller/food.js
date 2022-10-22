@@ -34,7 +34,17 @@ const addfood = async (req, res) => {
   const categories = await CategoryModel.find({name: category})
   const userfinder = await UserModel.findOne({ _id: Uid })
   if (userfinder) {
-    const newfood = new FoodModel({ foodName, description, price, category, createdBy: Uid })
+    
+    if (!req.file || req.file === [] || req.file == null) {
+      console.log('not found')
+      var imageURL 
+    } else {
+      console.log(req.file)
+      imageURL = `${req.protocol}://${req.headers.host}/${req.file.destination}/${req.file.filename}`
+        
+      }
+    const newfood = new FoodModel({ foodName, description, price, category, createdBy: Uid , pic: imageURL})
+    
     await newfood.save()
     
       const categoryfinder = categories
@@ -43,7 +53,7 @@ const addfood = async (req, res) => {
         await CategoryModel.updateOne({ name: categoryfinder.name }, { foodIDs: [...(categoryfinder.foodIDs), newfood._id] })
       }
     
-    res.status(200).json({ message: 'done'  })
+    res.status(200).json({ message: 'done' , data: newfood })
   } else {
     res.status(400).json({ message: 'error' })
   }

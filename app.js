@@ -2,6 +2,7 @@ const express = require('express')
 const multer = require('multer')
 const path = require('path')
 const shortid = require('shortid')
+const cors = require('cors')
 const connectDB = require('./DB/connectDB')
 const categoryRouter = require('./modules/category/category.router')
 const foodrouter = require('./modules/food/food.router')
@@ -30,7 +31,11 @@ function fileFilter (req, file, cb) {
 const upload = multer({ dest: 'uploadImages/', fileFilter, storage })
 
 app.use(upload.single('image'))
-
+const corsOptions = {
+  origin: 'https://foosfor.onrender.com',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors())
 app.use(router,foodrouter,categoryRouter)
 connectDB()
 let PORT = process.env.PORT

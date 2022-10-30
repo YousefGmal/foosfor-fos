@@ -46,7 +46,7 @@ const addcategory = async (req, res) => {
 // }
 
 const getcategories = async (req, res) => {
-  const categoryFinder = await CategoryModel.find()
+  const categoryFinder = await CategoryModel.find().populate('foodIDs','foodName description price pic')
   //  console.log(categoryFinder);
   //  console.log(11111111);
   if (categoryFinder) {

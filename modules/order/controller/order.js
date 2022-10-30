@@ -17,7 +17,7 @@ const addorder = async (req, res) => {
   if (userfinder && cartfinder) {
     const foods = cartfinder.cartItems
     if (foods) {
-      const newAddress = new AddressModel({ countryName, address, address2, district, postalCode })
+      const newAddress = new AddressModel({ countryName, address, address2, district })
       await newAddress.save()
       const newOrder = new OrderModel({
         foods: cartfinder.cartItems,
@@ -41,7 +41,7 @@ const addorder = async (req, res) => {
 
 const getorder = async (req, res) => {
   try {
-    const order = await OrderModel.findOne({ orderedBy: req.user.id }).select('-orderedBy')
+    const order = await OrderModel.findOne({ orderedBy: req.user.id }).select('-orderedBy').populate('shipAddress','countryName address address2 district ')
     res.status(200).json({ message: 'done', order })
   } catch (error) {
     res.status(500).json({ message: 'catch error', error })

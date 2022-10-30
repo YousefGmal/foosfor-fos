@@ -5,7 +5,6 @@ const addressSchema = new mongoose.Schema({
   address: { type: String, required: true },
   address2: { type: String },
   district: Number,
-  postalCode: String,
   createdBy: { type: mongoose.Types.ObjectId, ref: 'User' }
 }, {
   timestamps: true

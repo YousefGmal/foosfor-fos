@@ -6,13 +6,13 @@ const foodrouter = require('express').Router()
 
 // add food
 // eslint-disable-next-line no-sequences
-foodrouter.post('/food/add/:Uid', foodValidator[0, 2, 3, 4], handelValidation(), addfood)
+foodrouter.post('/food/add/:Uid',  addfood)
 // update food
-foodrouter.post('/food/update/:Uid/:Fid', foodValidator, handelValidation(), updatefood)
+foodrouter.post('/food/update/:Uid/:Fid',  updatefood)
 // delete food
-foodrouter.delete('/food/delete/:Fid', foodValidator[1], handelValidation(), deletefood)
+foodrouter.delete('/food/delete/:Fid', deletefood)
 // get foods
-foodrouter.get('/foods', verifyadmin, getfoods)
+foodrouter.get('/foods', getfoods)
 // get food by ID
-foodrouter.get('/food/:Fid', foodValidator[1], handelValidation(), getfood)
+foodrouter.get('/food/:Fid',  getfood)
 module.exports = foodrouter

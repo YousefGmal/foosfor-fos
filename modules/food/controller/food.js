@@ -4,9 +4,9 @@ const FoodModel = require('../../../DB/model/food')
 const UserModel = require('../../../DB/model/User')
 const getfoods = async (req, res) => {
   try {
-    const user = await UserModel.findOne({ _id: req.user.id }).select('-password')
-    console.log(user)
-    if (user) {
+    // const user = await UserModel.findOne({ _id: req.user.id }).select('-password')
+    // console.log(user)
+    if (true) {
       const food = await FoodModel.find()
       res.status(200).json({ message: 'done', data: food })
     } else {

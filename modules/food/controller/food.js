@@ -40,7 +40,7 @@ const addfood = async (req, res) => {
       var imageURL 
     } else {
       console.log(req.file)
-      imageURL = `${req.protocol}://${req.headers.host}/${req.file.destination}/${req.file.filename}`
+      imageURL = `https://github.com/YousefGmal/foosfor-fos/tree/master/uploadImages/${req.file.filename}`
         
       }
     const newfood = new FoodModel({ foodName, description, price, category, createdBy: Uid , pic: imageURL})

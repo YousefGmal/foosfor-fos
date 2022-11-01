@@ -6,7 +6,7 @@ const cartrouter = require('express').Router()
 cartrouter.get('/cart', auth, getcart)
 
 // add to cart
-cartrouter.post('/addtocart/:Fid', auth, addtocart)
+cartrouter.post('/addtocart/:Fid/:Uid', addtocart)
 
 cartrouter.post('/deletefromcart/:Fid', auth, deleteitem)
 module.exports = cartrouter

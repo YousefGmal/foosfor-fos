@@ -8,11 +8,11 @@ const CartModel = require('../../../DB/model/cart')
 const AddressModel = require('../../../DB/model/address')
 const addorder = async (req, res) => {
   // try {
+  const {Uid} = req.params
+  const { countryName, address, address2, district } = req.body
 
-  const { countryName, address, address2, district, postalCode } = req.body
-
-  const cartfinder = await CartModel.findOne({ userCart: req.user.id })
-  const userfinder = await UserModel.findOne({ _id: req.user.id })
+  const cartfinder = await CartModel.findOne({ userCart: Uid })
+  const userfinder = await UserModel.findOne({ _id: Uid})
   console.log(cartfinder)
   if (userfinder && cartfinder) {
     const foods = cartfinder.cartItems
@@ -22,11 +22,11 @@ const addorder = async (req, res) => {
       const newOrder = new OrderModel({
         foods: cartfinder.cartItems,
         total: cartfinder.total,
-        orderedBy: req.user.id,
+        orderedBy: Uid,
         shipAddress: newAddress._id
       })
       await newOrder.save()
-      await CartModel.deleteOne({ userCart: req.user.id })
+      // await CartModel.deleteOne({ userCart: req.user.id })
       res.status(200).json({ message: 'done', newOrder })
     } else {
       res.status(200).json({ message: 'no product to order' })

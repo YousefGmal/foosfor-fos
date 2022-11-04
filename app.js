@@ -12,6 +12,7 @@ const orderrouter = require('./modules/order/order.router')
 const cartrouter = require('./modules/cart/cart.router')
 const deliveryrouter = require('./modules/delivery/delivery.router')
 const app = express()
+app.use(cors())
 app.use(express.json())
 app.use('/uploadImages', express.static(path.join(__dirname, 'uploadImages')))
 const storage = multer.diskStorage({
@@ -38,7 +39,7 @@ const corsOptions = {
   origin: 'http://localhost:8000',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
-app.use(cors(corsOptions))
+
 app.use(router,foodrouter,categoryRouter,orderrouter,cartrouter,deliveryrouter)
 connectDB()
 let PORT = process.env.PORT

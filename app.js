@@ -35,10 +35,10 @@ const upload = multer({ dest: 'uploadImages/', fileFilter, storage })
 
 app.use(upload.single('image'))
 const corsOptions = {
-  origin: 'https://foosfor.onrender.com',
+  origin: 'http://localhost:8000',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(router,foodrouter,categoryRouter,orderrouter,cartrouter,deliveryrouter)
 connectDB()
 let PORT = process.env.PORT

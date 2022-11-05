@@ -2,7 +2,7 @@ const UserModel = require('../DB/model/User')
 const jwt = require('jsonwebtoken')
 const auth = async (req, res, next) => {
   
-    const headerToken = req.headers.token
+    const headerToken = req.headers['authorization']
     console.log(headerToken)
     if (!headerToken || headerToken == null || !headerToken.startsWith('Bearer')) {
       res.status(400).json({ message: 'in_valid headerToken' })

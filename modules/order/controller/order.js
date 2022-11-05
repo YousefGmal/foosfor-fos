@@ -48,4 +48,34 @@ const getorder = async (req, res) => {
   }
 }
 
-module.exports = { addorder, getorder }
+const getorderdetails = async (req, res) => {
+  try {
+    const {Oid} = req.params
+    const order = await OrderModel.findOne({_id : Oid}).populate('shipAddress','countryName address district').populate('orderedBy','firstName lastName')
+    res.status(200).json({ message: 'done', order })
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
+
+const getorders = async (req, res) => {
+  try {
+    
+    const order = await OrderModel.find()
+    res.status(200).json({ message: 'done', order })
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
+
+const deleteOrder = async (req, res) => {
+  try {
+    const {Oid} = req.params
+    const order = await OrderModel.findOneAndDelete({_id : Oid})
+    res.status(200).json({ message: 'done', order })
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
+
+module.exports = { addorder, getorder, getorderdetails, getorders, deleteOrder }

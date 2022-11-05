@@ -95,7 +95,7 @@ const signin = async (req, res) => {
         const match = await bcrypt.compare(password, user.password)
 
         if (match) {
-          const token = jwt.sign({ id: user.id, islogged: true, role: user.role }, process.env.secretKey)
+          const token = jwt.sign({ id: user.id, islogged: true, role: user.role }, process.env.secretKey, { expiresIn: 60 * 60 })
           console.log(token)
           res.status(200).json({ message: 'Done', token })
         } else {

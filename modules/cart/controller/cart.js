@@ -14,24 +14,24 @@ const getcart = async (req, res) => {
 
 const addtocart = async (req, res) => {
   // try {
-  const { Fid, Uid } = req.params
+  const { Fid } = req.params
   const { quantity } = req.body
-  const cartfinder = await CartModel.findOne({ userCart: Uid })
+  const cartfinder = await CartModel.findOne({ userCart: req.user.id })
   const foodfinder = await FoodModel.findById({ _id: Fid })
-  const userfinder = await UserModel.findOne({ _id: Uid })
+  const userfinder = await UserModel.findOne({ _id: req.user.id })
   console.log()
   if (userfinder && foodfinder) {
     if (cartfinder) {
-      await CartModel.updateOne({ userCart: Uid},
+       await CartModel.updateOne({ userCart: req.user.id},
         {
           cartItems: [...cartfinder.cartItems, { foodIDs: foodfinder.foodName, quantity, price: (foodfinder.price * quantity) }],
           total: (cartfinder.total + foodfinder.price * quantity)
         })
-      res.status(200).json({ message: 'done', cartfinder })
+      res.status(200).json({ message: 'done', data: cartfinder })
     } else {
-      const newCart = new CartModel({ cartItems: { foodIDs: foodfinder.foodName, quantity, price: (foodfinder.price * quantity) }, total: (foodfinder.price * quantity), userCart: Uid })
+      const newCart = new CartModel({ cartItems: { foodIDs: foodfinder.foodName, quantity, price: (foodfinder.price * quantity) }, total: (foodfinder.price * quantity), userCart: req.user.id })
       await newCart.save()
-      res.status(200).json({ message: 'done' })
+      res.status(200).json({ message: 'done', data: newCart })
     }
   } else {
     res.status(400).json({ message: 'error' })

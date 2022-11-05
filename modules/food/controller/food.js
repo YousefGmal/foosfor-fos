@@ -31,7 +31,7 @@ const addfood = async (req, res) => {
   // try {
   const { Uid } = req.params
   const { foodName, description, price, category } = req.body
-  const categories = await CategoryModel.find({name: category})
+  const categories = await CategoryModel.findOne({name: category})
   const userfinder = await UserModel.findOne({ _id: Uid })
   if (userfinder) {
     
@@ -49,10 +49,18 @@ const addfood = async (req, res) => {
     
       const categoryfinder = categories
       console.log(newfood._id)
+      console.log(categoryfinder.foodIDs);
       if (categoryfinder) {
-        await CategoryModel.updateOne({ name: categoryfinder.name }, { foodIDs: [...(categoryfinder.foodIDs), newfood._id] })
+        // if(categoryfinder.foodIDs == undefined)
+        // {
+        //   await CategoryModel.updateOne({ name: categoryfinder.name }, { foodIDs: newfood._id }, { new: true })
+
+        // }else{
+          await CategoryModel.updateOne({ name: categoryfinder.name }, { foodIDs: [...(categoryfinder.foodIDs), newfood._id] })
+
+        //}
       }
-    
+      
     res.status(200).json({ message: 'done' , data: newfood })
   } else {
     res.status(400).json({ message: 'error' })

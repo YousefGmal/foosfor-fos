@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { OAuth2Client } = require('google-auth-library')
 const clint = new OAuth2Client(process.env.GOOGLECLINTID);
-//const { sendEmail } = require('../../../commen/email')
+const { sendEmail } = require('../../../commen/email')
 const signup = async (req, res) => {
   try {
     const { userName, email, password } = req.body
@@ -15,9 +15,9 @@ const signup = async (req, res) => {
       const newUser = new UserModel({ userName, email, password })
       const savedUser = await newUser.save()
       const token = jwt.sign({ id: savedUser._id }, process.env.secretKey)
-    //   const message = `<a href="${req.protocol}://${req.headers.host}/user/confirm/${token}">click me</a>`
-    //   // const message = "sign up is finished"
-    //   await sendEmail(email, message)
+      const message = `<a href="${req.protocol}://${req.headers.host}/user/confirm/${token}">click me</a>`
+      // const message = "sign up is finished"
+      await sendEmail(email, message)
       res.status(200).json({ message: 'done' })
     }
   } catch (error) {
@@ -61,25 +61,25 @@ const loginWithGoogle = async(req, res) => {
 }
 
 
-// const confirmEmail = async (req, res) => {
-//   try {
-//     const { token } = req.params
+const confirmEmail = async (req, res) => {
+  try {
+    const { token } = req.params
 
-//     if (!token || token === undefined || token == null) {
-//       res.status(400).json({ message: 'token error' })
-//     } else {
-//       const decoded = jwt.verify(token, process.env.secretKey)
-//       const user = await UserModel.findOneAndUpdate({ _id: decoded.id, confirmed: false }, { confirmed: true }, { new: true })
-//       if (user) {
-//         res.status(200).json({ message: 'please login' })
-//       } else {
-//         res.status(400).json({ message: 'in valid link' })
-//       }
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: 'catch error', error })
-//   }
-// }
+    if (!token || token === undefined || token == null) {
+      res.status(400).json({ message: 'token error' })
+    } else {
+      const decoded = jwt.verify(token, process.env.secretKey)
+      const user = await UserModel.findOneAndUpdate({ _id: decoded.id, confirmed: false }, { confirmed: true }, { new: true })
+      if (user) {
+        res.status(200).json({ message: 'please login' })
+      } else {
+        res.status(400).json({ message: 'in valid link' })
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
 
 const signin = async (req, res) => {
   try {
@@ -89,9 +89,13 @@ const signin = async (req, res) => {
     if (!user) {
       res.status(400).json({ message: 'check email or password' })
     } else {
-      if (!user.confirmed) {
-        res.status(400).json({ message: 'in-valid user' })
+      if (user.block) {
+        res.status(400).json({ message: 'user is blocked' })
+        
       } else {
+        if(!user.confirmed){
+          res.status(400).json({ message: 'in-valid user' })
+        }else{
         const match = await bcrypt.compare(password, user.password)
 
         if (match) {
@@ -100,7 +104,7 @@ const signin = async (req, res) => {
           res.status(200).json({ message: 'Done', token })
         } else {
           res.status(400).json({ message: 'check email or password' })
-        }
+        }}
       }
     }
   } catch (error) {
@@ -122,4 +126,34 @@ const profile = async (req, res) => {
   }
 }
 
-module.exports = { signup, signin, profile, loginWithGoogle }
+const editprofile = async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ _id: req.user.id }).select('-password')
+
+    if (!user) {
+      res.status(400).json({ message: 'in-valid user' })
+    } else {
+      res.status(200).json({ message: 'Done', user })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
+
+const blockUser = async (req, res) => {
+  try {
+    const {Uid} = req.params
+    const user = await UserModel.findOneAndUpdate({ _id: Uid },{block: true},{new: true})
+
+    if (!user) {
+      res.status(400).json({ message: 'in-valid user' })
+    } else {
+      res.status(200).json({ message: 'Done', user })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
+
+
+module.exports = { signup, signin, profile, loginWithGoogle, confirmEmail, blockUser }

@@ -6,6 +6,7 @@ const OrderModel = require('../../../DB/model/order')
 const UserModel = require('../../../DB/model/User')
 const CartModel = require('../../../DB/model/cart')
 const AddressModel = require('../../../DB/model/address')
+const CounterModel = require('../../../DB/model/counter')
 const addorder = async (req, res) => {
   // try {
   const {Uid} = req.params
@@ -13,19 +14,29 @@ const addorder = async (req, res) => {
 
   const cartfinder = await CartModel.findOne({ userCart: Uid })
   const userfinder = await UserModel.findOne({ _id: Uid})
+  // const counter = await CounterModel.findOne()
   console.log(cartfinder)
+  // if(!counter)
+  // {
+  //   const count = 1
+  //   const newCounter = new CounterModel({ counter: count })
+  //   await newCounter.save()
+  // }
   if (userfinder && cartfinder) {
+    const counterfinder = await CounterModel.findOneAndUpdate({},{ '$inc': {'counter' : 1} })
     const foods = cartfinder.cartItems
     if (foods) {
       const newAddress = new AddressModel({ countryName, address, address2, district })
       await newAddress.save()
       const newOrder = new OrderModel({
+        orderNumber: counterfinder.counter,
         foods: cartfinder.cartItems,
         total: cartfinder.total,
         orderedBy: Uid,
         shipAddress: newAddress._id
       })
       await newOrder.save()
+      //const data = await CounterModel.findOneAndUpdate({counter: counterfinder.counter},{ '$inc': {'counter' : 1} })
       // await CartModel.deleteOne({ userCart: req.user.id })
       res.status(200).json({ message: 'done', newOrder })
     } else {

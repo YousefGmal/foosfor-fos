@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: 'Customer' },
   shareProfileLink: String,
   paymentHistory: Array,
+  block: { type: Boolean, default: false }
   // accountStatus:{type:String , default:'offline'},
 
 }, {

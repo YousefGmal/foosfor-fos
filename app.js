@@ -12,7 +12,22 @@ const orderrouter = require('./modules/order/order.router')
 const cartrouter = require('./modules/cart/cart.router')
 const deliveryrouter = require('./modules/delivery/delivery.router')
 const app = express()
-app.use(cors())
+const corsOptions = {
+  origin: ['http://localhost:3000'],
+  credentials: true,
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors({
+  origin: ['http://localhost:3000'],
+  credentials: true,
+}))
+// app.use(function (req, res, next) {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+//   res.header('Access-Control-Allow-Credentials', true);
+//   next();
+//   });
 app.use(express.json())
 app.use('/uploadImages', express.static(path.join(__dirname, 'uploadImages')))
 const storage = multer.diskStorage({
@@ -35,10 +50,7 @@ function fileFilter (req, file, cb) {
 const upload = multer({ dest: 'uploadImages/', fileFilter, storage })
 
 app.use(upload.single('image'))
-const corsOptions = {
-  origin: 'http://localhost:8000',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+
 
 app.use(router,foodrouter,categoryRouter,orderrouter,cartrouter,deliveryrouter)
 connectDB()

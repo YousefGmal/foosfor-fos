@@ -5,7 +5,7 @@ const { getorder, addorder, getorders, getorderdetails, deleteOrder } = require(
 // add to cart or creat an order
 orderrouter.post('/addorder/:Uid',  addorder)
 
-orderrouter.post('/addorder/:Oid',  deleteOrder)
+orderrouter.post('/deleteorder/:Oid',  deleteOrder)
 
 // cart or orders
 orderrouter.get('/getorder',  getorder)

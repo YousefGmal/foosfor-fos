@@ -70,10 +70,10 @@ const getcategory = async (req, res) => {
 }
 
 const deletecategory = async (req, res) => {
-    const { Uid, Cid } = req.params
-    const userfinder = await UserModel.findById({_id: Uid})
+    const { Cid } = req.params
+    //const userfinder = await UserModel.findById({_id: Uid})
     const categoryFinder = await CategoryModel.findById(Cid)
-    if (userfinder) {
+    if (true) {
         if(categoryFinder){
             const category = await CategoryModel.findByIdAndDelete(Cid)
             res.status(200).json({ message: 'done', data: category })

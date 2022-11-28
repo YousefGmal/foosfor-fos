@@ -1,6 +1,6 @@
 const { auth } = require('../../middleware/auth')
 const { handelValidation } = require('../../middleware/handelValidation')
-const { signup,  signin, profile, loginWithGoogle, confirmEmail, blockUser, getusers } = require('./controller/user')
+const { signup,  signin, profile, loginWithGoogle, blockUser, getusers } = require('./controller/user')
 const { signUpValidator } = require('./user.validation')
 
 const router = require('express').Router()
@@ -9,7 +9,7 @@ router.post('/user/signup', signUpValidator, handelValidation(), signup)
 // google login
 router.post("/user/googleLogin" , loginWithGoogle)
 // Email confirmation
-router.get('/user/confirm/:token', confirmEmail)
+// router.get('/user/confirm/:token', confirmEmail)
 // sign in
 // eslint-disable-next-line no-sequences
 router.post('/user/signin', signUpValidator[1, 2], handelValidation(), signin)

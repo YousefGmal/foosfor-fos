@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { OAuth2Client } = require('google-auth-library')
 const clint = new OAuth2Client(process.env.GOOGLECLINTID);
-const { sendEmail } = require('../../../commen/email')
+// const { sendEmail } = require('../../../commen/email')
 // const wbm = require('wbm');
 const signup = async (req, res) => {
   try {
@@ -74,25 +74,26 @@ const loginWithGoogle = async(req, res) => {
 //     await wbm.end();
 // }).catch(err => console.log(err));
 // }
-const confirmEmail = async (req, res) => {
-  try {
-    const { token } = req.params
 
-    if (!token || token === undefined || token == null) {
-      res.status(400).json({ message: 'token error' })
-    } else {
-      const decoded = jwt.verify(token, process.env.secretKey)
-      const user = await UserModel.findOneAndUpdate({ _id: decoded.id, confirmed: false }, { confirmed: true }, { new: true })
-      if (user) {
-        res.status(200).json({ message: 'please login' })
-      } else {
-        res.status(400).json({ message: 'in valid link' })
-      }
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'catch error', error })
-  }
-}
+// const confirmEmail = async (req, res) => {
+//   try {
+//     const { token } = req.params
+
+//     if (!token || token === undefined || token == null) {
+//       res.status(400).json({ message: 'token error' })
+//     } else {
+//       const decoded = jwt.verify(token, process.env.secretKey)
+//       const user = await UserModel.findOneAndUpdate({ _id: decoded.id, confirmed: false }, { confirmed: true }, { new: true })
+//       if (user) {
+//         res.status(200).json({ message: 'please login' })
+//       } else {
+//         res.status(400).json({ message: 'in valid link' })
+//       }
+//     }
+//   } catch (error) {
+//     res.status(500).json({ message: 'catch error', error })
+//   }
+// }
 
 const signin = async (req, res) => {
   try {
@@ -180,4 +181,4 @@ const blockUser = async (req, res) => {
 }
 
 
-module.exports = { signup, signin, profile, loginWithGoogle, confirmEmail, blockUser, getusers }
+module.exports = { signup, signin, profile, loginWithGoogle, blockUser, getusers }

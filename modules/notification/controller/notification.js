@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-const NotificationModel = require('../../../DB/model/Notification')
+const NotificationModel = require('../../../DB/model/notification')
 const UserModel = require('../../../DB/model/User')
 const getNotifications = async (req, res) => {
   try {

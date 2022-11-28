@@ -1,4 +1,5 @@
 const OfferModel = require("../../../DB/model/offer")
+const UserModel = require("../../../DB/model/User")
 
 const getoffers = async (req, res) => {
     try {
@@ -28,7 +29,7 @@ const getoffers = async (req, res) => {
   const addoffer = async (req, res) => {
     // try {
     const { Uid } = req.params
-    const { offerName, description, price, points, expire } = req.body
+    const { offerName, description, price, points } = req.body
     
     const userfinder = await UserModel.findOne({ _id: Uid })
     if (userfinder) {
@@ -41,7 +42,7 @@ const getoffers = async (req, res) => {
         imageURL = `https://github.com/YousefGmal/foosfor-fos/tree/master/uploadImages/${req.file.filename}`
           
         }
-      const newoffer = new OfferModel({ offerName, description, price, points, expire , pic: imageURL})
+      const newoffer = new OfferModel({ offerName, description, price, points , pic: imageURL})
       
       await newoffer.save()
         
@@ -57,11 +58,11 @@ const getoffers = async (req, res) => {
   const updateoffer = async (req, res) => {
     try {
       const { Uid, OFid } = req.params
-      const { offerName, description, price, points, expire } = req.body
+      const { offerName, description, price, points } = req.body
       const user = await UserModel.findById({ _id: Uid })
       
       if (user) {
-        const data = await OfferModel.findByIdAndUpdate(OFid, { offerName, description, price, points, expire }, { new: true })
+        const data = await OfferModel.findByIdAndUpdate(OFid, { offerName, description, price, points}, { new: true })
         if (data) {
           res.status(200).json({ message: 'done', data: data })
         } else {

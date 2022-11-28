@@ -4,7 +4,7 @@ const categorySchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true },
   categoryPic: String,
-  //parentID: { type: mongoose.Types.ObjectId, ref: 'Category' },
+  upCategory: {type: String},
   categoryURL: String,
   foodIDs: [{ type: mongoose.Types.ObjectId, ref: 'Food' }]
 

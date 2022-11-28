@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
   userName: { type: String, required: true },
   firstName: String,
   lastName: String,
-  email: { type: String, required: true },
+  email: { type: String, required: true, unique:true },
   password: { type: String },
   //birthdate: { type: Date, required: true },
   //wishes: [{ type: mongoose.Types.ObjectId, ref: 'Food' }]

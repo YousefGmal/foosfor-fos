@@ -4,10 +4,11 @@ const jwt = require('jsonwebtoken')
 const { OAuth2Client } = require('google-auth-library')
 const clint = new OAuth2Client(process.env.GOOGLECLINTID);
 const { sendEmail } = require('../../../commen/email')
+// const wbm = require('wbm');
 const signup = async (req, res) => {
   try {
     const { userName, email, password } = req.body
-    const user = await UserModel.findOne({ email })
+    const user = await UserModel.findOne({ email: email })
 
     if (user) {
       res.status(400).json({ message: 'email exist' })
@@ -27,32 +28,33 @@ const signup = async (req, res) => {
 
 const loginWithGoogle = async(req, res) => {
 
-  const { name, photoUrl, firstName, lastName, response } = req.body
-  const idToken = response.id_token;
-  clint.verifyIdToken({ idToken, audience: process.env.GOOGLECLINTID }).then(async(response) => {
-      console.log(response);
-      const { email_verified, email } = response.payload
+  const {access_token} = req.query
+  const { name, photoUrl, firstName, lastName, id_token } = req.body
+  const idToken = id_token;
+  clint.verifyIdToken({ idToken, audience: process.env.GOOGLECLINTID }).then(async () => {
+    console.log(response);
+    const { email_verified, email } = response.payload;
 
 
-      if (email_verified) {
+    if (email_verified) {
 
-          const user = await UserModel.findOne({ email });
+      const user = await UserModel.findOne({ email });
 
-          if (user) {
-              //user already exist just login
-              const token = jwt.sign({ id: user._id, isLoggedIn: true }, process.env.secretKey, { expiresIn: 3600 })
-              res.status(200).json({ message: "Done already exist and login", token, status: 200 })
-          } else {
-              const newUser = await UserModel.insertMany({ userName: name, firstName, lastName, email, confirmed: true, profilePic: photoUrl });
-              const token = jwt.sign({ id: newUser._id, isLoggedIn: true }, process.env.secretKey, { expiresIn: 3600 })
-              res.status(201).json({ message: "Done signup then login", token, status: 201 })
-
-          }
-
-
+      if (user) {
+        //user already exist just login
+        const token = jwt.sign({ id: user._id, isLoggedIn: true }, process.env.secretKey);
+        res.status(200).json({ message: "Done already exist and login", token, status: 200 });
       } else {
-          res.status(400).json({ message: "in-valid google account" })
+        const newUser = await UserModel.insertMany({ userName: name, firstName, lastName, email, confirmed: true, profilePic: photoUrl });
+        const token = jwt.sign({ id: newUser._id, isLoggedIn: true }, process.env.secretKey);
+        res.status(201).json({ message: "Done signup then login", token, status: 201 });
+
       }
+
+
+    } else {
+      res.status(400).json({ message: "in-valid google account" });
+    }
 
 
   })
@@ -60,7 +62,18 @@ const loginWithGoogle = async(req, res) => {
 
 }
 
+// const phonevefy = async (req,res) => {
+//   const {phoneNumber} = req.body
 
+
+
+// wbm.start().then(async () => {
+//     const phones = [phoneNumber];
+//     const message = 'Good Morning.';
+//     await wbm.send(phones, message);
+//     await wbm.end();
+// }).catch(err => console.log(err));
+// }
 const confirmEmail = async (req, res) => {
   try {
     const { token } = req.params
@@ -84,7 +97,7 @@ const confirmEmail = async (req, res) => {
 const signin = async (req, res) => {
   try {
     const { email, password } = req.body
-    const user = await UserModel.findOne({ email })
+    const user = await UserModel.findOne({ email : email }).lean()
 
     if (!user) {
       res.status(400).json({ message: 'check email or password' })
@@ -99,7 +112,7 @@ const signin = async (req, res) => {
         const match = await bcrypt.compare(password, user.password)
 
         if (match) {
-          const token = jwt.sign({ id: user.id, islogged: true, role: user.role }, process.env.secretKey, { expiresIn: 60 * 60 })
+          const token = jwt.sign({ id: user.id, islogged: true, role: user.role }, process.env.secretKey)
           console.log(token)
           res.status(200).json({ message: 'Done', token })
         } else {
@@ -126,6 +139,16 @@ const profile = async (req, res) => {
   }
 }
 
+const getusers = async (req, res) => {
+  try {
+    const users = await UserModel.find().select('-password')
+      res.status(200).json({ message: 'Done', users })
+    
+  } catch (error) {
+    res.status(500).json({ message: 'catch error', error })
+  }
+}
+
 const editprofile = async (req, res) => {
   try {
     const user = await UserModel.findOne({ _id: req.user.id }).select('-password')
@@ -141,19 +164,20 @@ const editprofile = async (req, res) => {
 }
 
 const blockUser = async (req, res) => {
-  try {
+  //try {
     const {Uid} = req.params
-    const user = await UserModel.findOneAndUpdate({ _id: Uid },{block: true},{new: true})
+    const {block} = req.body
+    const user = await UserModel.findOneAndUpdate({ _id: Uid },{block: block},{new: true})
 
     if (!user) {
       res.status(400).json({ message: 'in-valid user' })
     } else {
       res.status(200).json({ message: 'Done', user })
     }
-  } catch (error) {
-    res.status(500).json({ message: 'catch error', error })
-  }
+  // } catch (error) {
+  //   res.status(500).json({ message: 'catch error', error })
+  // }
 }
 
 
-module.exports = { signup, signin, profile, loginWithGoogle, confirmEmail, blockUser }
+module.exports = { signup, signin, profile, loginWithGoogle, confirmEmail, blockUser, getusers }

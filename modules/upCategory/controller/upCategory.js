@@ -1,30 +1,22 @@
 const { default: slugify } = require('slugify')
-const CategoryModel = require('../../../DB/model/category')
 const UpCategoryModel = require('../../../DB/model/upCategory')
 const UserModel = require('../../../DB/model/User')
 
 const addcategory = async (req, res) => {
-  const { name, upCategory } = req.body
-  const upCategoryFinder = await UpCategoryModel.findOne({name: upCategory})
-  if(upCategoryFinder){
-    if (!req.file || req.file === [] || req.file == null) {
-      console.log('not found')
-      var imageURL 
-    } else {
-      console.log(req.file)
-      imageURL = `${req.protocol}://${req.headers.host}/${req.file.destination}/${req.file.filename}`
-        
-      }
+  const { name } = req.body
+  if (!req.file || req.file === [] || req.file == null) {
+    console.log('not found')
+    var imageURL 
+  } else {
+    console.log(req.file)
+    imageURL = `${req.protocol}://${req.headers.host}/${req.file.destination}/${req.file.filename}`
       
-      const categoryURL = slugify(name)
-      const newCategory = new CategoryModel({ name, slug: slugify(name),upCategory, categoryURL, categoryPic: imageURL })
-      await newCategory.save()
-      const updateUpCat =  await UpCategoryModel.findOneAndUpdate({ name: upCategoryFinder.name }, { categoryIDs: [...(upCategoryFinder.categoryIDs), newCategory._id] })
+    }
+    const categoryURL = slugify(name)
+    const newCategory = new UpCategoryModel({ name, slug: slugify(name), categoryURL, categoryPic: imageURL })
+    await newCategory.save()
 
-  
-      res.status(200).json({ message: 'done', data: newCategory })
-  }
-  
+    res.status(200).json({ message: 'done', data: newCategory })
   
 }
 
@@ -54,12 +46,12 @@ const addcategory = async (req, res) => {
 // }
 
 const getcategories = async (req, res) => {
-  const categoryFinder = await CategoryModel.find().populate('categoryIDs','categoryName description price pic')
-  //  console.log(categoryFinder);
+  const upcategoryFinder = await UpCategoryModel.find().populate('categoryIDs','name slug pic')
+  //  console.log(upcategoryFinder);
   //  console.log(11111111);
-  if (categoryFinder) {
+  if (upcategoryFinder) {
     
-    res.status(200).json({ message: 'done', data: categoryFinder })
+    res.status(200).json({ message: 'done', data: upcategoryFinder })
   } else {
     res.status(400).json({ message: 'category not found' })
   }
@@ -67,11 +59,11 @@ const getcategories = async (req, res) => {
 
 const getcategory = async (req, res) => {
   const {Cslug} = req.params
-  const categoryFinder = await CategoryModel.findOne({slug : Cslug}).populate('categoryIDs','categoryName description price pic')
+  const upcategoryFinder = await UpCategoryModel.findOne({slug : Cslug}).populate('categoryIDs','name slug pic')
   
-  if (categoryFinder) {
+  if (upcategoryFinder) {
     
-    res.status(200).json({ message: 'done', data: categoryFinder })
+    res.status(200).json({ message: 'done', data: upcategoryFinder })
   } else {
     res.status(400).json({ message: 'category not found' })
   }
@@ -80,10 +72,10 @@ const getcategory = async (req, res) => {
 const deletecategory = async (req, res) => {
     const { Cid } = req.params
     //const userfinder = await UserModel.findById({_id: Uid})
-    const categoryFinder = await CategoryModel.findById(Cid)
+    const upcategoryFinder = await UpCategoryModel.findById(Cid)
     if (true) {
-        if(categoryFinder){
-            const category = await CategoryModel.findByIdAndDelete(Cid)
+        if(upcategoryFinder){
+            const category = await UpCategoryModel.findByIdAndDelete(Cid)
             res.status(200).json({ message: 'done', data: category })
         
         
@@ -99,7 +91,7 @@ const updatecategory = async (req, res) => {
     const { Uid, Cid } = req.params
     const {name } = req.body
     const userfinder = await UserModel.findById({_id: Uid})
-    const categoryFinder = await CategoryModel.findById(Cid)
+    const upcategoryFinder = await UpCategoryModel.findById(Cid)
     if (userfinder) {
       if (!req.file || req.file === [] || req.file == null) {
         console.log('not found')
@@ -109,9 +101,9 @@ const updatecategory = async (req, res) => {
         imageURL = `${req.protocol}://${req.headers.host}/${req.file.destination}/${req.file.filename}`
           
         }
-        if(categoryFinder){
+        if(upcategoryFinder){
           const categoryURL = slugify(name)
-            const category = await CategoryModel.findByIdAndUpdate(Cid, { name, slug: slugify(name), categoryURL,categorypic: imageURL }, { new: true })
+            const category = await UpCategoryModel.findByIdAndUpdate(Cid, { name, slug: slugify(name), categoryURL,categorypic: imageURL }, { new: true })
             res.status(200).json({ message: 'done', data: category })   
     } else {
       res.status(200).json({ message: 'category not found' })
@@ -126,13 +118,13 @@ const updatecategory = async (req, res) => {
 
 const getProductInCategory = async (req, res) => {
   const { categoryURL } = req.params
-  const category = await CategoryModel.findOne({ categoryURL }).select('-parentID').populate('productIDs')
+  const category = await UpCategoryModel.findOne({ categoryURL }).select('-parentID').populate('productIDs')
   console.log(category)
   if (category) {
     if (category.productIDs[0] != undefined) {
       res.status(200).json({ message: 'done', category })
     } else {
-      const categories = await CategoryModel.find()
+      const categories = await UpCategoryModel.find()
       const categoryChildren = createCategories(categories)
       const categoryfilter = categoryChildren.filter((c) => (c.name == category.name))
       res.status(200).json({ message: 'done', categoryfilter })

@@ -10,8 +10,10 @@ require('dotenv').config()
 const router = require('./modules/user/user.router')
 const orderrouter = require('./modules/order/order.router')
 const cartrouter = require('./modules/cart/cart.router')
+const upcategoryRouter = require('./modules/upCategory/upCategory.router')
 const deliveryrouter = require('./modules/delivery/delivery.router')
 const offerrouter = require('./modules/offer/offer.router')
+const Notificationrouter = require('./modules/notification/notification.router')
 const app = express()
 const corsOptions = {
   origin: ['http://localhost:3000'],
@@ -54,10 +56,15 @@ const upload = multer({ dest: 'uploadImages/', fileFilter, storage })
 app.use(upload.single('image'))
 
 
-app.use(router,foodrouter,categoryRouter,orderrouter,cartrouter,deliveryrouter,offerrouter)
+app.use(router,foodrouter,categoryRouter,upcategoryRouter,orderrouter,Notificationrouter,cartrouter,deliveryrouter,offerrouter)
 connectDB()
 let PORT = process.env.PORT
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log('Example app listening on port 3000!')
   })
   
+const io = require('./services/socket').init(server)
+
+io.on('connection' , (socket)=>{
+  console.log(socket.id);
+})

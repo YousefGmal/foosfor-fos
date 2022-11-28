@@ -24,20 +24,49 @@ const createDelivery = async (req, res) => {
 
 const addDelivery = async (req, res) => {
   // try {
-    const {deliveryName, code} = req.body
+    const {deliveryName, code, phone} = req.body
     const deliveryfinder = await DeliveryModel.findOne({code:code})
-    
+    console.log(code);
+    console.log(deliveryfinder);
     if (deliveryfinder) {
       if(deliveryfinder.deliveryName){
         res.status(200).json({ message: 'done', data: deliveryfinder })
       } else {
-        const deliveryfinder = await DeliveryModel.findOneAndUpdate(code, {deliveryName}, { new: true })
-        res.status(200).json({ message: 'done', data: deliveryfinder })
+        const deliveryfinderr = await DeliveryModel.findOneAndUpdate({code}, {deliveryName, phone}, { new: true })
+        res.status(200).json({ message: 'done', data: deliveryfinderr })
 
       }
 
     } else {
       res.status(400).json({ message: 'code not found' })
+    }
+  // } catch (error) {
+  //   res.status(500).json({ message: 'catch error', error })
+  // }
+}
+const getdeliveries = async (req, res) => {
+  // try {
+     const deliveryfinder = await DeliveryModel.find().populate('selectedOrders','foods total orderedBy shipAddress')
+    if (deliveryfinder) {
+      
+      res.status(200).json({ message: 'done', data: deliveryfinder })
+    } else {
+      res.status(400).json({ message: 'No orders yet' })
+    }
+  // } catch (error) {
+  //   res.status(500).json({ message: 'catch error', error })
+  // }
+}
+
+const getdelivery = async (req, res) => {
+  // try {
+    const {Did} = req.params
+     const deliveryfinder = await DeliveryModel.findOne({_id: Did}).populate('selectedOrders','foods total orderedBy shipAddress')
+    if (deliveryfinder) {
+      
+      res.status(200).json({ message: 'done', data: deliveryfinder })
+    } else {
+      res.status(400).json({ message: 'No orders yet' })
     }
   // } catch (error) {
   //   res.status(500).json({ message: 'catch error', error })
@@ -83,9 +112,10 @@ const getOrdersNotDelivered = async (req, res) => {
         const {Did} = req.params
        const orderfinder = await OrderModel.findOne({ _id: Oid })
        const deliveryfinder = await DeliveryModel.findOne({ _id: Did })
-      if (orderfinder) {
+       const user = await UserModel.findOne({_id: req.user.id})
+      if (orderfinder && user) {
         if(deliveryfinder){
-        const orderfinder = await OrderModel.findByIdAndUpdate(Oid, { visible : false , deliveredBy: Did }, { new: true })
+        const orderfinder = await OrderModel.findByIdAndUpdate(Oid, { visible : false , deliveredBy: Did , status: "with the delivery"}, { new: true })
         
         const deliveryupdated =  await DeliveryModel.findByIdAndUpdate(Did, { selectedOrders: [...(deliveryfinder.selectedOrders), orderfinder._id] })
         res.status(200).json({ message: 'done', data: deliveryupdated })
@@ -102,7 +132,7 @@ const getOrdersNotDelivered = async (req, res) => {
   const getOrdersSelected = async (req, res) => {
     // try {
         const {Did} = req.params
-       const deliveryfinder = await DeliveryModel.findOne({_id : Did}).populate('selectedOrders','foods total orderedBy shipAddress')
+       const deliveryfinder = await DeliveryModel.findOne({_id : Did}).populate('selectedOrders','orderNumber foods total orderedBy shipAddress').select('-phone -deliveryName')
       if (deliveryfinder) {
         
         res.status(200).json({ message: 'done', data: deliveryfinder })
@@ -118,7 +148,7 @@ const getOrdersNotDelivered = async (req, res) => {
     // try {
         const {Did , Oid} = req.params
        const deliveryfinder = await DeliveryModel.findOne({_id : Did})
-        const order = await OrderModel.findOne({_id : Oid}).populate('shipAddress','countryName address district').populate('orderedBy','firstName lastName')
+        const order = await OrderModel.findOne({_id : Oid}).populate('shipAddress','countryName address district').populate('orderedBy','firstName lastName phone')
         if(deliveryfinder){
             if(order){
               // const address = await AddressModel.findOne({_id : })
@@ -163,7 +193,7 @@ const getOrdersNotDelivered = async (req, res) => {
         const order = await OrderModel.findOne({_id : Oid})
         if(deliveryfinder){
             if(order){
-              const orderfinder = await OrderModel.findByIdAndUpdate(order._id, { visible : true , deliveredBy: null }, { new: true })
+              const orderfinder = await OrderModel.findByIdAndUpdate(order._id, { visible : true , deliveredBy: null, status: "processing"  }, { new: true })
               const deliveryupdated =  await DeliveryModel.findByIdAndUpdate(Did, { selectedOrders: [...(deliveryfinder.selectedOrders.filter(x => x != Oid))] })
                 res.status(200).json({ message: 'done', data: order })
             } else {
@@ -178,6 +208,6 @@ const getOrdersNotDelivered = async (req, res) => {
     // }
   }
 
-  module.exports = {getOrdersNotDelivered, selectOrders, getOrdersSelected, getOrderSelected, delivered, cancelled, deleteDelivery, addDelivery, createDelivery}
+  module.exports = {getOrdersNotDelivered, selectOrders, getOrdersSelected, getOrderSelected, delivered, cancelled, deleteDelivery, addDelivery, createDelivery, getdelivery, getdeliveries}
 
 

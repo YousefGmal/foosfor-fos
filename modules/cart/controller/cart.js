@@ -3,29 +3,58 @@ const FoodModel = require('../../../DB/model/food')
 const UserModel = require('../../../DB/model/User')
 
 const getcart = async (req, res) => {
-  try {
-    const cart = await CartModel.findOne({ userCart: req.user.id }).populate('cartItems.foodIDs')
-
-    res.status(200).json({ message: 'done', cart })
-  } catch (error) {
-    res.status(500).json({ message: 'catch error', error })
-  }
+  //try {
+    const cartfinder = await CartModel.findOne({ userCart: req.user.id })
+    console.log(cartfinder);
+    res.status(200).json({ message: 'done', cartfinder })
+  // } catch (error) {
+  //   res.status(500).json({ message: 'catch error', error })
+  // }
 }
+
 
 const addtocart = async (req, res) => {
   // try {
   const { Fid } = req.params
+  const cartfinder = await CartModel.findOne({ userCart: req.user.id })
+  const foodfinder = await FoodModel.findById({ _id: Fid })
+  //const userfinder = await UserModel.findOne({ _id: req.user.id })
+  console.log()
+  if ( foodfinder) {
+    if (cartfinder) {
+       const updateCart = await CartModel.findOneAndUpdate({ userCart: req.user.id},
+        {
+          cartItems: [...cartfinder.cartItems, { foodIDs: foodfinder.foodName, quantity: 1, price: (foodfinder.price) }],
+          total: (parseInt(cartfinder.total) + parseInt(foodfinder.price ))
+        },{new:true})
+      res.status(200).json({ message: 'done', data: updateCart })
+    } else {
+      const newCart = new CartModel({ cartItems: { foodIDs: foodfinder.foodName, quantity: 1, price: (foodfinder.price ) }, total: (foodfinder.price), userCart: req.user.id })
+      await newCart.save()
+      res.status(200).json({ message: 'done', data: newCart })
+    }
+  } else {
+    res.status(400).json({ message: 'error' })
+  }
+  // } catch (error) {
+  // res.status(500).json({ message: 'catch error', error })
+  // }
+}
+
+const updatecart = async (req, res) => {
+  // try {
+  
   const { quantity } = req.body
   const cartfinder = await CartModel.findOne({ userCart: req.user.id })
   const foodfinder = await FoodModel.findById({ _id: Fid })
-  const userfinder = await UserModel.findOne({ _id: req.user.id })
+  //const userfinder = await UserModel.findOne({ _id: req.user.id })
   console.log()
-  if (userfinder && foodfinder) {
+  if ( foodfinder) {
     if (cartfinder) {
        await CartModel.updateOne({ userCart: req.user.id},
         {
           cartItems: [...cartfinder.cartItems, { foodIDs: foodfinder.foodName, quantity, price: (foodfinder.price * quantity) }],
-          total: (cartfinder.total + foodfinder.price * quantity)
+          total: (cartfinder.total + (foodfinder.price * quantity))
         })
       res.status(200).json({ message: 'done', data: cartfinder })
     } else {
@@ -45,20 +74,21 @@ const deleteitem = async (req, res) => {
   const { Fid } = req.params
 
   const cartfinder = await CartModel.findOne({ userCart: req.user.id })
-  const foodfinder = await FoodModel.findById({ _id: Fid })
-  const userfinder = await UserModel.findOne({ _id: req.user.id })
-  if (userfinder && foodfinder) {
+  
+  //const userfinder = await UserModel.findOne({ _id: req.user.id })
+  
+  if ( true) {
     if (cartfinder) {
-      const food = cartfinder.cartItems.find((x) => x.foodIDs == Fid)
-      const cartfilter = cartfinder.cartItems.filter((x) => x.foodIDs != Fid)
-      console.log(food.price)
+      const food = cartfinder.cartItems.find((x) => x._id == Fid)
+      const cartfilter = cartfinder.cartItems.filter((x) => x._id != Fid)
+      console.log(food)
       console.log(cartfilter)
-      await CartModel.updateOne({ userCart: req.user.id },
+      const updateCart = await CartModel.findOneAndUpdate({ userCart: req.user.id },
         {
           cartItems: [...cartfilter],
           total: (cartfinder.total - (food.price * food.quantity))
-        })
-      res.status(200).json({ message: 'done', cartfilter })
+        },{new:true})
+      res.status(200).json({ message: 'done', updateCart })
     } else {
       // const newCart = new CartModel({ cartItems: { foodIDs: foodfinder._id, quantity, price: (foodfinder.price * quantity) }, total: (foodfinder.price * quantity), userCart: req.user.id })
       // await newCart.save()

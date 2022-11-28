@@ -1,6 +1,6 @@
 const { verifyadmin } = require('../../middleware/auth')
 const { handelValidation } = require('../../middleware/handelValidation')
-const { addNotification, updateNotification, deleteNotification, getNotification, getNotifications } = require('./controller/Notification')
+const { addNotification, updateNotification, deleteNotification, getNotification, getNotifications } = require('./controller/notification')
 //const { NotificationValidator } = require('./Notification.validation')
 const Notificationrouter = require('express').Router()
 

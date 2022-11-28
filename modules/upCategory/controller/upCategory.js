@@ -59,7 +59,7 @@ const getcategories = async (req, res) => {
 
 const getcategory = async (req, res) => {
   const {Cslug} = req.params
-  const upcategoryFinder = await UpCategoryModel.findOne({slug : Cslug}).populate('categoryIDs','name slug pic')
+  const upcategoryFinder = await UpCategoryModel.findOne({slug : Cslug}).populate('categoryIDs','name slug categoryPic')
   
   if (upcategoryFinder) {
     

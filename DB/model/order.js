@@ -9,10 +9,12 @@ const orderSchema = new mongoose.Schema({
   orderedBy: { type: mongoose.Types.ObjectId, ref: 'User' },
   // status: { type: String, default: 'Pending' },
   shipAddress: { type: mongoose.Types.ObjectId, ref: 'Address' },
+  deliveryCost : Number,
   visible: {type: Boolean, default: true},
   delivered: {type: Boolean, default: false},
   status:{type: String, default:'processing' },
   deliveredBy: {type: mongoose.Types.ObjectId, ref: 'Delivery'},
+  withDelivery: String,
   rating: Number,
   comment: String
 }, {

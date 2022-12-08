@@ -1,6 +1,6 @@
 const orderrouter = require('express').Router()
 const { auth } = require('../../middleware/auth')
-const { getorder, addorder, getorders, getorderdetails, deleteOrder, ratingOrder, getOrderStatus } = require('./controller/order')
+const {  addorder, getorders, getorderdetails, deleteOrder, ratingOrder, getOrderStatus, getUserOrder } = require('./controller/order')
 
 // add to cart or creat an order
 orderrouter.post('/addorder/:Uid',  addorder)
@@ -8,7 +8,7 @@ orderrouter.post('/addorder/:Uid',  addorder)
 orderrouter.post('/deleteorder/:Oid',  deleteOrder)
 
 // cart or orders
-orderrouter.get('/getorder',auth,  getorder)
+orderrouter.get('/getUserOrder',auth,  getUserOrder)
 
 orderrouter.get('/getorders',  getorders)
 

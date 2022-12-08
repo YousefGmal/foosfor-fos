@@ -8,6 +8,8 @@ const CartModel = require('../../../DB/model/cart')
 const AddressModel = require('../../../DB/model/address')
 const CounterModel = require('../../../DB/model/counter')
 const io = require('../../../services/socket')
+const CountryModel = require('../../../DB/model/country')
+const fs = require('fs')
 const addorder = async (req, res) => {
   // try {
   const {Uid} = req.params
@@ -15,6 +17,7 @@ const addorder = async (req, res) => {
 
   //const cartfinder = await CartModel.findOne({ userCart: Uid }).lean()
   const userfinder = await UserModel.findOne({ _id: Uid}).lean()
+  const countryFinder = await CountryModel.findOne({country : countryName})
   // const counter = await CounterModel.findOne()
   //console.log(cartfinder)
   // if(!counter)
@@ -40,11 +43,13 @@ const addorder = async (req, res) => {
         const {foodIDs,quantity,price} = cart[i]
          newcart[i] = {foodIDs,quantity,price}; 
       }
+      const finalTotal = utotal +  countryFinder.deliveryCost
       console.log(newcart);
       const newOrder = new OrderModel({
         orderNumber: counterfinder.counter,
         foods: newcart,
-        total: utotal,
+        deliveryCost: countryFinder.deliveryCost,
+        total: finalTotal,
         orderedBy: Uid,
         shipAddress: newAddress._id
       })
@@ -66,15 +71,30 @@ const addorder = async (req, res) => {
   // }
 }
 
-const getorder = async (req, res) => {
+const getUserOrder = async (req, res) => {
   try {
     
     const order = await OrderModel.find({ orderedBy: req.user.id }).select('-orderedBy').populate('shipAddress','countryName address address2 district ')
-    res.status(200).json({ message: 'done', order })
+    let lastOrders = []
+    if(order.length >= 6) {
+      for (let i = 0; i < 6; i++) {
+        lastOrders[i] = order[i];
+        
+      }
+    }else {
+      for (let i = 0; i < order.length; i++) {
+        lastOrders[i] = order[i];
+        
+      }
+    }
+    
+    res.status(200).json({ message: 'done', lastOrders })
   } catch (error) {
     res.status(500).json({ message: 'catch error', error })
   }
 }
+
+
 
 const getorderdetails = async (req, res) => {
   try {
@@ -87,13 +107,21 @@ const getorderdetails = async (req, res) => {
 }
 
 const getorders = async (req, res) => {
-  try {
+  //try {
     
     const order = await OrderModel.find().populate('shipAddress','countryName address district').populate('orderedBy','firstName lastName')
+    // let json = JSON.stringify(order);
+    // fs.writeFile('mynewfile3.json', json, function (err) {
+    //   if (err) throw err;
+    //   console.log('Saved!');
+    // }); 
+    // let rawdata = fs.readFileSync('mynewfile3.json');
+    // let order = JSON.parse(rawdata);
+     
     res.status(200).json({ message: 'done', order })
-  } catch (error) {
-    res.status(500).json({ message: 'catch error', error })
-  }
+//   } catch (error) {
+//     res.status(500).json({ message: 'catch error', error })
+//   }
 }
 
 const getOrderStatus = async (req, res) => {
@@ -141,4 +169,4 @@ const ratingOrder = async (req, res) => {
 
 
 
-module.exports = { addorder, getorder, getorderdetails, getorders, deleteOrder, ratingOrder, getOrderStatus }
+module.exports = { addorder, getUserOrder, getorderdetails, getorders, deleteOrder, ratingOrder, getOrderStatus }

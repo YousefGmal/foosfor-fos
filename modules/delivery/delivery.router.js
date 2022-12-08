@@ -1,5 +1,5 @@
 const { auth } = require('../../middleware/auth')
-const { getOrdersNotDelivered, selectOrders, getOrderSelected, getOrdersSelected, cancelled, delivered, createDelivery, addDelivery, deleteDelivery, getdelivery, getdeliveries } = require('./controller/delivery')
+const { getOrdersNotDelivered, selectOrders, getOrderSelected, getOrdersSelected, cancelled, delivered, createDelivery, addDelivery, deleteDelivery, getdelivery, getdeliveries, getDeliveryDetails } = require('./controller/delivery')
 
 const deliveryrouter = require('express').Router()
 
@@ -22,6 +22,8 @@ deliveryrouter.get('/delivery/ordersSelected/:Did',  getOrdersSelected)
 deliveryrouter.get('/delivery/order/:Did/:Oid',  getOrderSelected)
 
 deliveryrouter.post('/delivery/order/delivered/:Did/:Oid',  delivered)
+
+deliveryrouter.get('/deliverydetails/order/:Oid',  getDeliveryDetails)
 
 deliveryrouter.post('/delivery/order/cancelled/:Did/:Oid', auth,  cancelled)
 

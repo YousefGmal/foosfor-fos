@@ -1,10 +1,11 @@
 const UserModel = require('../../../DB/model/User')
 const bcrypt = require('bcrypt')
+
 const jwt = require('jsonwebtoken')
 const { OAuth2Client } = require('google-auth-library')
 const clint = new OAuth2Client(process.env.GOOGLECLINTID);
 // const { sendEmail } = require('../../../commen/email')
-// const wbm = require('wbm');
+const wbm = require('wbm');
 const signup = async (req, res) => {
   try {
     const { userName, email, password } = req.body
@@ -29,14 +30,14 @@ const signup = async (req, res) => {
 const loginWithGoogle = async(req, res) => {
 
   const {access_token} = req.query
-  const { name, photoUrl, firstName, lastName, id_token } = req.body
+  const { name, photoUrl, email, id_token } = req.body
   const idToken = id_token;
   clint.verifyIdToken({ idToken, audience: process.env.GOOGLECLINTID }).then(async () => {
-    console.log(response);
-    const { email_verified, email } = response.payload;
+    // console.log(response);
+    // const { email_verified, email } = response.payload;
 
 
-    if (email_verified) {
+    if (email) {
 
       const user = await UserModel.findOne({ email });
 
@@ -45,7 +46,7 @@ const loginWithGoogle = async(req, res) => {
         const token = jwt.sign({ id: user._id, isLoggedIn: true }, process.env.secretKey);
         res.status(200).json({ message: "Done already exist and login", token, status: 200 });
       } else {
-        const newUser = await UserModel.insertMany({ userName: name, firstName, lastName, email, confirmed: true, profilePic: photoUrl });
+        const newUser = await UserModel.insertMany({ userName: name,  email, confirmed: true, profilePic: photoUrl });
         const token = jwt.sign({ id: newUser._id, isLoggedIn: true }, process.env.secretKey);
         res.status(201).json({ message: "Done signup then login", token, status: 201 });
 
@@ -62,18 +63,18 @@ const loginWithGoogle = async(req, res) => {
 
 }
 
-// const phonevefy = async (req,res) => {
-//   const {phoneNumber} = req.body
+const phonevefy = async (req,res) => {
+  const {phoneNumber} = req.body
 
 
 
-// wbm.start().then(async () => {
-//     const phones = [phoneNumber];
-//     const message = 'Good Morning.';
-//     await wbm.send(phones, message);
-//     await wbm.end();
-// }).catch(err => console.log(err));
-// }
+wbm.start().then(async () => {
+    const phones = [phoneNumber];
+    const message = 'Good Morning.';
+    await wbm.send(phones, message);
+    await wbm.end();
+}).catch(err => console.log(err));
+}
 
 // const confirmEmail = async (req, res) => {
 //   try {
@@ -113,7 +114,7 @@ const signin = async (req, res) => {
         const match = await bcrypt.compare(password, user.password)
 
         if (match) {
-          const token = jwt.sign({ id: user.id, islogged: true, role: user.role }, process.env.secretKey)
+          const token = jwt.sign({ id: user._id, islogged: true, role: user.role }, process.env.secretKey)
           console.log(token)
           res.status(200).json({ message: 'Done', token })
         } else {
@@ -143,6 +144,8 @@ const profile = async (req, res) => {
 const getusers = async (req, res) => {
   try {
     const users = await UserModel.find().select('-password')
+  
+    
       res.status(200).json({ message: 'Done', users })
     
   } catch (error) {
@@ -181,4 +184,4 @@ const blockUser = async (req, res) => {
 }
 
 
-module.exports = { signup, signin, profile, loginWithGoogle, blockUser, getusers }
+module.exports = { signup, signin, profile, loginWithGoogle, blockUser, getusers, phonevefy }

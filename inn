@@ -1,0 +1,1 @@
+https://accounts.google.com/o/oauth2/auth?client_id={934088887813-5g6k805luh567e6s96jcceamf3kdjrq6.apps.googleusercontent.com}&response_type=token&redirect_uri={http://localhost:3000/auth/google/callback}&scope={['profile']}

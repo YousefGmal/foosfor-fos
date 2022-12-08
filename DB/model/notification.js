@@ -3,6 +3,7 @@ const notificationSchema = new mongoose.Schema({
     NotificationName: { type: String, required: true },
     pic: { type: String },
     description: { type: String, required: true },
+    notifyat : { type: Date, required: true }
   }, {
     timestamps: true
   })

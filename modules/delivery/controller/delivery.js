@@ -3,6 +3,8 @@ const OrderModel = require("../../../DB/model/order")
 const UserModel = require("../../../DB/model/User")
 const { generateCuteCode } = require('cute-code-generator')
 const AddressModel = require("../../../DB/model/address")
+const CountryModel = require("../../../DB/model/country")
+let date_ob = new Date()
 const createDelivery = async (req, res) => {
   // try {
     const {Uid} = req.params
@@ -29,9 +31,12 @@ const addDelivery = async (req, res) => {
     console.log(code);
     console.log(deliveryfinder);
     if (deliveryfinder) {
-      if(deliveryfinder.deliveryName){
+      if (deliveryfinder.deliveryName){
+      if(deliveryfinder.deliveryName == deliveryName && deliveryfinder.phone == phone){
         res.status(200).json({ message: 'done', data: deliveryfinder })
-      } else {
+      }else {
+        res.status(400).json({ message: 'invalid user' })
+      }} else {
         const deliveryfinderr = await DeliveryModel.findOneAndUpdate({code}, {deliveryName, phone}, { new: true })
         res.status(200).json({ message: 'done', data: deliveryfinderr })
 
@@ -115,7 +120,10 @@ const getOrdersNotDelivered = async (req, res) => {
        const user = await UserModel.findOne({_id: req.user.id})
       if (orderfinder && user) {
         if(deliveryfinder){
-        const orderfinder = await OrderModel.findByIdAndUpdate(Oid, { visible : false , deliveredBy: Did , status: "with the delivery"}, { new: true })
+          let hours = date_ob.getHours();
+        let minutes = date_ob.getMinutes();
+        const dateN = `${hours}:${minutes}`
+        const orderfinder = await OrderModel.findByIdAndUpdate(Oid, { visible : false , deliveredBy: Did , status: "with the delivery", withDelivery: dateN}, { new: true })
         
         const deliveryupdated =  await DeliveryModel.findByIdAndUpdate(Did, { selectedOrders: [...(deliveryfinder.selectedOrders), orderfinder._id] })
         res.status(200).json({ message: 'done', data: deliveryupdated })
@@ -127,6 +135,19 @@ const getOrdersNotDelivered = async (req, res) => {
     // } catch (error) {
     //   res.status(500).json({ message: 'catch error', error })
     // }
+  }
+
+  const getDeliveryDetails = async (req,res)=>{
+
+    const {Uid} = req.body
+    const {Oid} = req.params
+    const orderfinder = await OrderModel.findOne({_id:Oid}).populate('deliveredBy','deliveryName phone').select('-foods')
+    if (orderfinder) {
+        
+      res.status(200).json({ message: 'done', data: orderfinder })
+    } else {
+      res.status(400).json({ message: 'order error' })
+    }
   }
 
   const getOrdersSelected = async (req, res) => {
@@ -149,10 +170,11 @@ const getOrdersNotDelivered = async (req, res) => {
         const {Did , Oid} = req.params
        const deliveryfinder = await DeliveryModel.findOne({_id : Did})
         const order = await OrderModel.findOne({_id : Oid}).populate('shipAddress','countryName address district').populate('orderedBy','firstName lastName phone')
+        const deliveryCost = await CountryModel.findOne({country:order.shipAddress.countryName}).select('deliveryCost')
         if(deliveryfinder){
             if(order){
               // const address = await AddressModel.findOne({_id : })
-                res.status(200).json({ message: 'done', data: order })
+                res.status(200).json({ message: 'done', data: order,deliveryCost })
             } else {
                 res.status(400).json({ message: 'error' })
             }
@@ -172,7 +194,7 @@ const getOrdersNotDelivered = async (req, res) => {
         const order = await OrderModel.findOne({_id : Oid})
         if(deliveryfinder){
             if(order){
-              const orderfinder = await OrderModel.findByIdAndUpdate(order._id, { delivered: true }, { new: true })
+              const orderfinder = await OrderModel.findByIdAndUpdate(order._id, { delivered: true , status: 'delivered'}, { new: true })
                 res.status(200).json({ message: 'done', data: order })
             } else {
                 res.status(400).json({ message: 'error' })
@@ -208,6 +230,6 @@ const getOrdersNotDelivered = async (req, res) => {
     // }
   }
 
-  module.exports = {getOrdersNotDelivered, selectOrders, getOrdersSelected, getOrderSelected, delivered, cancelled, deleteDelivery, addDelivery, createDelivery, getdelivery, getdeliveries}
+  module.exports = {getOrdersNotDelivered, selectOrders, getOrdersSelected, getOrderSelected, delivered, cancelled, deleteDelivery, addDelivery, createDelivery, getdelivery, getdeliveries, getDeliveryDetails}
 
 

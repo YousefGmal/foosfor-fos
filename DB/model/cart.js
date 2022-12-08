@@ -1,7 +1,7 @@
 const { default: mongoose } = require('mongoose')
 
 const cartSchema = new mongoose.Schema({
-  cartItems: [{ foodIDs: { type: String, ref: 'Food' }, quantity: { type: Number, default: 1 }, price: { type: Number } }],
+  cartItems: [{ foodIDs: { type: String }, quantity: { type: Number, default: 1 }, price: { type: Number } }],
   total: Number,
   userCart: { type: mongoose.Types.ObjectId, ref: 'User' }
 
